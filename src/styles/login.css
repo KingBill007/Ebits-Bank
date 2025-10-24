@@ -1,0 +1,76 @@
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.App {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f0f0f0;
+  font-family: 'Poppins', sans-serif;
+}
+
+.container {
+  background-color: white;
+  text-align: center;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  width: 350px;
+}
+
+.logoImg {
+  width: 80px;
+  margin-bottom: 0px;
+}
+
+.subtitle {
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 25px;
+}
+
+.form {
+  text-align: left; 
+  margin-bottom: 15px;
+}
+
+.form label {
+  display: block;
+  font-weight: bold;
+  margin: 10px 0 5px;
+}
+
+.loginInput {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.forgot {
+  color: #0047ab;
+  font-size: 13px;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.signInBtn {
+  background-color: #0047ab;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  width: 100%;
+  cursor: pointer;
+}
+
+.signInBtn:hover {
+  background-color: #003a8c;
+}
