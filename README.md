@@ -4,4 +4,4 @@ This is a simple banking application
 ### Tech Stack
 - React
 - NodeJS (Express)
-- MongoDB
+- MongoDB (Database)
