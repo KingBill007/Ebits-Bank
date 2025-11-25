@@ -4,21 +4,16 @@
   "type": "module",
   "private": true,
   "dependencies": {
-    "@testing-library/dom": "^10.4.1",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^13.5.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.9.4",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "@vitejs/plugin-react": "^5.1.1"
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "test": "vite test",
-    "eject": "vite eject"
+    "build": "vite build"
   },
   "eslintConfig": {
     "extends": [
@@ -39,6 +34,9 @@
     ]
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^5.1.1"
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0"
   }
 }
