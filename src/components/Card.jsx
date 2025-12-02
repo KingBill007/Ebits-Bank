@@ -17,7 +17,7 @@ function Card (props){
       <div className="accountCard">
         <div className="accountCardLeft">
           <span style={{ fontWeight: "bold" }}>{props.type} Account</span>
-          <span style={{ fontSize: 28, fontWeight: "bold", color:'rgba(1, 45, 156, 1)' }}>{props.amount}</span>
+          <span style={{ fontSize: 28, fontWeight: "bold", color:'rgba(1, 45, 156, 1)' }}>{props.amount.toFixed(2)}</span>
           <span style={{ fontSize: 13 }}>Account {maskAccountNumber(props.account)}</span>
           <div className={styles.btnBox}>
             <button className={styles.bttnBlue} onClick={()=>{props.func('Deposit',props.type,'depositModal',props.account)}} ><PiHandDepositFill />Deposit</button>
