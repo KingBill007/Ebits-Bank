@@ -1,4 +1,4 @@
-import '../styles/login.css';
+import '../styles/main.css';
 import logo from '../assets/logo.png';
 import { useNavigate } from 'react-router-dom';
 
@@ -24,6 +24,10 @@ function Login() {
 
         <p className="forgot">Forgot password?</p>
         <button className="signInBtn" onClick={()=>navigateTo('dashboard')}>Sign In</button>
+
+        <p><span style={{fontSize:13}}>Dont have an account?</span>
+        <button className="signUpBtnLight" onClick={()=>navigateTo('signup')}>Sign Up</button>
+        </p>
       </div>
     </div>
   );
