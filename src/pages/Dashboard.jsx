@@ -1,21 +1,134 @@
-import '../styles/dashboard.css';
+import '../styles/main.css';
 import Card from '../components/Card';
 import data from '../data/Data';
-import { useState } from 'react';
+import { useState , useEffect , useRef } from 'react';
 import Header from '../components/Header';
+import axios from 'axios';
+import Cookies from 'js-cookie';
+import {URL} from '../data/URL';
+import Modal from 'react-modal';
+import styles from '../styles/dashboard.module.css';
+import { FaPlus } from "react-icons/fa";
 
 
 function Dashboard () {
 
+    const [method, setmethod] = useState('');
+    const [totalBal, settotalBal] = useState(202.20);
+    const [depAmount, setdepAmount] = useState(0);
+    const [activeAccNo, setactiveaccNo] = useState();
+    const modalType = useRef('');
+    const [activeType, setactiveType] = useState('');
+    const [createType, setcreatType] = useState('Current');
+    const [depOpen,setdepOpen] = useState(false)
+    const [createOpen,setcreateOpen] = useState(false)
+    const [hasAccount, sethasAccount] = useState(false)
+    const userId = Cookies.get('userId');
     const [selectVal, setselectVal] = useState('All')
+    const [info, setInfo] = useState();
+
+    //Check if userId has accounts and save accounts
+    const checkAccounts = async () =>{
+        try{
+            const response = await axios.get(`${URL.baseURL}${URL.API_URL}/accounts/checkAcc/${userId}`);
+            if (response.data && response.data.length > 0){
+                sethasAccount(true)
+                setInfo(response.data)
+                //console.log(response.data)
+            }else{
+                sethasAccount(false);
+                setInfo([])
+            }
+            //filter the sum of user accounts
+            const totalValue = response.data.filter(acc => acc.userId._id === userId).reduce((sum, acc) => sum + acc.Value, 0);
+            settotalBal(totalValue)
+        }catch(err){
+            console.log(err)
+        }
+    }
+    useEffect(()=>{
+        checkAccounts()
+    },[])
+
+    //Opens Available Modals
+    const openModal = async (method,type,modalName,accNo)=>{
+        modalType.current = type;
+        setactiveType(modalType.current);
+        setmethod(method);
+        setactiveaccNo(accNo)
+        if ( modalName === 'depositModal' ){setdepOpen(true);}
+        if ( modalName === 'createAccountModal' ){setcreateOpen(true);}
+    }
+
+    //deposit / withdraw
+    const depositFunc = async ()=>{
+        let Amount = 0
+        if (method === 'Deposit'){
+            Amount = depAmount;
+        } else if(method === 'Withdraw'){
+            Amount = -depAmount;
+        }
+        try{
+            const response = await axios.post(`${URL.baseURL}${URL.API_URL}/accounts/deposit`,{
+                accNumber: activeAccNo,
+                accType: activeType,
+                amount: Amount
+            });
+            console.log(response.data)
+            checkAccounts()
+            setdepOpen(false);
+        }catch(err){
+            console.log(err)
+        }
+    }
+
+    //Create an account in the database
+    const createAccount = async ()=>{
+        try{
+            const response = await axios.post(
+                `${URL.baseURL}${URL.API_URL}/accounts/create`,
+                {
+                    type: createType,
+                    userId: userId
+                }
+            );
+            console.log(createType)
+            checkAccounts();
+            setcreateOpen(false)
+            console.log('response: ',response)
+        }catch(err){
+            console.log(err)
+        }
+    }
     
     return (
         <div className='screen'>
-            <Header />
+            <Header total={totalBal}/>
             <div className='content'>
                 <div className='topContent'>
-                    <Card type="Current" amount="$12,450.39" account="Account ****7890" />
-                    <Card type="Savings" amount="$28,987.20" account="Account ****7890" />
+                    { hasAccount ? 
+                        (
+                            info.map((item,index)=>
+                                <>
+                                    <Card 
+                                        type={item.accType} 
+                                        amount={item.Value} 
+                                        account={item.accNumber} 
+                                        func={openModal}    
+                                    />
+                                    {info.length < 2 ?
+                                        <button onClick={()=>{setcreateOpen(true)}} style={{width:'10%',height:100}} ><FaPlus size={50} color='rgba(63, 63, 64, 0.46)' /></button> :
+                                        <></>
+                                    }
+                                </>
+                            )
+                        )
+                        :
+                        (<div className={styles.noAccDiv}>
+                            <p>You Have No Accounts.</p>
+                            <button style={{height:40}} onClick={()=>{openModal(null,null,'createAccountModal')}}>Create Account</button>
+                        </div>)
+                    }    
                 </div>
                 <div className='bottomContent'>
                     <div className='upperBttm'>
@@ -50,6 +163,34 @@ function Dashboard () {
                     </div>
                 </div>
             </div>
+
+                <Modal //modal for deposit
+                    name="depositModal"
+                    isOpen={depOpen} 
+                    onRequestClose={() => setdepOpen(false)} 
+                    className={styles.modalContent} 
+                    overlayClassName={styles.modalOverlay} 
+                >
+                        <h2>{activeType} Account</h2>
+                        <input type='number' placeholder='Gh₵' onChange={(val)=>setdepAmount(Number(val.target.value))}></input>
+                        <button onClick={depositFunc}>{method}</button>
+                </Modal>
+                <Modal //modal for create account
+                    name="createAccountModal"
+                    isOpen={createOpen} 
+                    onRequestClose={() => setcreateOpen(false)} 
+                    className={styles.modalContent} 
+                    overlayClassName={styles.modalOverlay} 
+                >
+                        <h2>Create Account</h2>
+                        <div style={{display:'flex',width:'100%',justifyContent:'space-around'}}>
+                            <select value={createType} onChange={(val)=>setcreatType(val.target.value)}>
+                                <option value="Current">Current Account</option>
+                                <option value="Savings">Savings Account</option>
+                            </select>   
+                            <button onClick={createAccount}>Create account</button>
+                        </div>
+                </Modal>
         </div>
     )
 }   

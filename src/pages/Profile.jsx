@@ -1,5 +1,5 @@
 import Header from "../components/Header";
-import '../styles/profile.css';
+import '../styles/main.css';
 import user from '../assets/user.png';
 import { BiUser } from "react-icons/bi";
 import { MdOutlineEmail } from "react-icons/md";
