@@ -9,6 +9,7 @@ import {URL} from '../data/URL';
 import Modal from 'react-modal';
 import styles from '../styles/dashboard.module.css';
 import { FaPlus } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
 
 
 function Dashboard () {
@@ -27,9 +28,19 @@ function Dashboard () {
     const [selectVal, setselectVal] = useState('All')
     const [info, setInfo] = useState();
 
+    const navigate = useNavigate();
+    const navigateTo = (location) =>{
+        navigate('/'+location);
+    }
     //Check if userId has accounts and save accounts
     const checkAccounts = async () =>{
         try{
+            //check if userId exist as cookie
+            if (!userId){
+                navigateTo('');
+                return;
+            }
+            //get user accounts
             const response = await axios.get(`${URL.baseURL}${URL.API_URL}/accounts/checkAcc/${userId}`);
             if (response.data && response.data.length > 0){
                 sethasAccount(true)
@@ -110,7 +121,7 @@ function Dashboard () {
                         (
                             info.map((item,index)=>
                                 <>
-                                    <Card 
+                                    <Card key={index}
                                         type={item.accType} 
                                         amount={item.Value} 
                                         account={item.accNumber} 
