@@ -10,10 +10,12 @@ import Modal from 'react-modal';
 import styles from '../styles/dashboard.module.css';
 import { FaPlus } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
+import { Oval } from 'react-loader-spinner';//loading spinner
 
 
 function Dashboard () {
 
+    const [isLoading, setisLoading] = useState(false)
     const [method, setmethod] = useState('');
     const [totalBal, settotalBal] = useState(202.20);
     const [depAmount, setdepAmount] = useState(0);
@@ -28,10 +30,20 @@ function Dashboard () {
     const [selectVal, setselectVal] = useState('All')
     const [info, setInfo] = useState();
 
+    //ERROR display function
+    const [errorOpen, seterrorOpen] = useState(false);
+    const [errorMsg,seterrorMsg] = useState('Error');
+    const showError = (message)=>{
+        seterrorMsg("Error: "+message);
+        seterrorOpen(true);
+    }
+
+    //navigation function
     const navigate = useNavigate();
     const navigateTo = (location) =>{
         navigate('/'+location);
     }
+
     //Check if userId has accounts and save accounts
     const checkAccounts = async () =>{
         try{
@@ -53,13 +65,21 @@ function Dashboard () {
             //filter the sum of user accounts
             const totalValue = response.data.filter(acc => acc.userId._id === userId).reduce((sum, acc) => sum + acc.Value, 0);
             settotalBal(totalValue)
+
+            if (errorOpen) {
+                const timer = setTimeout(() => {
+                seterrorOpen(false);  // this triggers fade-out
+                }, 10000); // show for 3 seconds
+            
+                return () => clearTimeout(timer);
+            }
         }catch(err){
             console.log(err)
         }
     }
     useEffect(()=>{
         checkAccounts()
-    },[])
+    },[errorOpen])
 
     //Opens Available Modals
     const openModal = async (method,type,modalName,accNo)=>{
@@ -80,14 +100,20 @@ function Dashboard () {
             Amount = -depAmount;
         }
         try{
+            setisLoading(true)
+            //send deposit to server
             const response = await axios.post(`${URL.baseURL}${URL.API_URL}/accounts/deposit`,{
                 accNumber: activeAccNo,
                 accType: activeType,
-                amount: Amount
+                amount: Number(Math.floor(Amount * 100) / 100)
             });
             console.log(response.data)
+            if (!response.data.Sucess){
+                showError(response.data.message)
+            }
             checkAccounts()
             setdepOpen(false);
+            setisLoading(false)
         }catch(err){
             console.log(err)
         }
@@ -106,7 +132,10 @@ function Dashboard () {
             console.log(createType)
             checkAccounts();
             setcreateOpen(false)
-            console.log('response: ',response)
+            if (!response.data.Sucess){
+                showError(response.data.message)
+            }
+            //console.log('response: ',response)
         }catch(err){
             console.log(err)
         }
@@ -183,8 +212,20 @@ function Dashboard () {
                     overlayClassName={styles.modalOverlay} 
                 >
                         <h2>{activeType} Account</h2>
-                        <input type='number' placeholder='Gh₵' onChange={(val)=>setdepAmount(Number(val.target.value))}></input>
-                        <button onClick={depositFunc}>{method}</button>
+                        <input type='number' min='0' step={.01} placeholder='Gh₵ (2 decimal place)' onChange={(val)=>setdepAmount(Number(val.target.value))}></input>
+                        <button onClick={depositFunc} style={{display:'flex',justifyContent:'center',alignItems:'center'}}>
+                            {isLoading ?
+                                <Oval
+                                    height={20}
+                                    width={20}
+                                    color="#012D9C"
+                                    secondaryColor="#f3f3f3"
+                                    strokeWidth={5}
+                                    strokeWidthSecondary={5}
+                                /> : 
+                                method
+                            }
+                        </button>
                 </Modal>
                 <Modal //modal for create account
                     name="createAccountModal"
@@ -201,6 +242,16 @@ function Dashboard () {
                             </select>   
                             <button onClick={createAccount}>Create account</button>
                         </div>
+                </Modal>
+                <Modal //modal for ERROR!!!
+                    name="errorModal"
+                    isOpen={errorOpen} 
+                    onRequestClose={() => seterrorOpen(false)} 
+                    className='errorContent' 
+                    overlayClassName='errorOverlay'
+                    closeTimeoutMS={300}   // wait 300ms before unmounting
+                >
+                    {errorMsg}
                 </Modal>
         </div>
     )

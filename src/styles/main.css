@@ -338,6 +338,7 @@ tr:hover {
   /* pointer-events: auto;        enables clicking on the modal */
   border-radius: 10px;
   min-width: 400px;
+  max-width: 50%;
   margin: 20px 30px 30px 20px;  
   outline: none;
   border: none;

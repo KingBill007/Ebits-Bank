@@ -51,9 +51,13 @@ function Login() {
         console.log(response.data)
         if (response.data.Sucess == false){
           showError(response.data.message)
-        } 
+          return;
+        }else if (response.data.Sucess == true){
+          Cookies.set('userId', response.data.userId);
+          navigateTo('dashboard')
+        }
     }catch(err){
-      console.log(err)
+      showError(err)
     }
   }
 

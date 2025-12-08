@@ -6,12 +6,21 @@ import { MdOutlineEmail } from "react-icons/md";
 import { FiPhone } from "react-icons/fi";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { useNavigate } from 'react-router-dom';
+import Cookies from "js-cookie";
 
 function Profile() {
-        const navigate = useNavigate();
-      const navigateTo = (location) => {
-        navigate("/" + location);
-      };
+
+    //User details in cookies
+    const fName = Cookies.get('fName');
+    const lName = Cookies.get('lName');
+    const email = Cookies.get('email');
+    const pNumber = Cookies.get('pNumber');
+
+    //navigation function
+    const navigate = useNavigate();
+    const navigateTo = (location) => {
+    navigate("/" + location);
+    };
 
     return(
         <div className="screen">
@@ -22,19 +31,22 @@ function Profile() {
                     <div className="pTitle">
                         <img src={user} alt='user' className="userImg"/>
                         <div className="pTitleText">
-                            <text style={{fontWeight:'bold',fontSize:20}}>John Anderson</text>
-                            <text style={{fontSize:15,color:'#000000a2'}}>Account holder</text>
+                            <span style={{fontWeight:'bold',fontSize:20}}>{ fName + " " + lName }</span>
+                            <span style={{fontSize:15,color:'#000000a2'}}>Account holder</span>
                         </div>
                     </div> 
                     <div className="pBody">
-                        <label><BiUser size={15} style={{marginRight:'5'}} />Full name</label>
-                        <input className="pInput" placeholder="John Anderson"></input>
+                        <label><BiUser size={15} style={{marginRight:'5'}} />First name</label>
+                        <input className="pInput" placeholder={fName}></input>
+
+                        <label><BiUser size={15} style={{marginRight:'5'}} />Last name</label>
+                        <input className="pInput" placeholder={lName}></input>
 
                         <label><MdOutlineEmail size={15} style={{marginRight:'5'}} />Email Address</label>
-                        <input className="pInput" placeholder="john.anderson@email.com"></input>
+                        <input className="pInput" placeholder={email}></input>
 
                         <label><FiPhone size={15} style={{marginRight:'5'}} />Phone Number</label>
-                        <input className="pInput" placeholder="0568242552"></input>
+                        <input className="pInput" placeholder={pNumber}></input>
 
                         <button className="pUpdate">Update Profile</button>
                     </div>

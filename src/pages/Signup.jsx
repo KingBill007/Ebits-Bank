@@ -34,12 +34,12 @@ function Signup () {
             pNumber: formData.pNumber
           }
         ) //save userdetails to server
-        console.log(response.data.message)
-        Cookies.set('fName', response.data.message.fName, { expires: 3 });//store all user details as cookies
-        Cookies.set('lName', response.data.message.lName, { expires: 3 });
-        Cookies.set('email', response.data.message.email, { expires: 3 });
-        Cookies.set('pNumber', response.data.message.pNumber, { expires: 3 });
-        Cookies.set('userId', response.data.message._id, { expires: 3 });
+        console.log(response.data.userInfo)
+        Cookies.set('fName', response.data.userInfo.fName, { expires: 3 });//store all user details as cookies
+        Cookies.set('lName', response.data.userInfo.lName, { expires: 3 });
+        Cookies.set('email', response.data.userInfo.email, { expires: 3 });
+        Cookies.set('pNumber', response.data.userInfo.pNumber, { expires: 3 });
+        Cookies.set('userId', response.data.userInfo._id, { expires: 3 });
         navigateTo('dashboard');//go to dashboard
     }catch(err){
       console.log(err)
@@ -69,7 +69,7 @@ function Signup () {
           <input className="loginInput" type="email" name="email"  value={formData.email} onChange={handleChange} />
 
           <label>Phone Number</label>
-          <input className="loginInput" type="number" name="pNumber"  value={formData.pNumber} onChange={handleChange}/>
+          <input className="loginInput" type="tel" name="pNumber"  value={formData.pNumber} onChange={handleChange}/>
 
           <label>Password</label>
           <input className="loginInput" type="password" name="password"  value={formData.password} onChange={handleChange} />
