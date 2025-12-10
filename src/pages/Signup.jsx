@@ -5,8 +5,12 @@ import { useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import {URL} from '../data/URL';
+ 
+
 
 function Signup () {
+
+  const [showPassword,setshowPassword] = useState(false)
 
   const [formData, setformData] = useState({
     fName:"",
@@ -72,7 +76,14 @@ function Signup () {
           <input className="loginInput" type="tel" name="pNumber"  value={formData.pNumber} onChange={handleChange}/>
 
           <label>Password</label>
-          <input className="loginInput" type="password" name="password"  value={formData.password} onChange={handleChange} />
+          <div style={{position:'relative'}}>
+            <input className="loginInput" type={showPassword ? 'text' : "password"} name="password"  value={formData.password} onChange={handleChange} />
+            <span 
+            style={{position:'absolute',right:3,top:'20%'}}
+            onClick={()=>{showPassword ? setshowPassword(false) : setshowPassword(true)}} >
+              {showPassword ? <FaEye opacity={0.3} /> : <FaEyeSlash opacity={0.3} />}
+            </span>
+          </div>
 
           <button className="signInBtn" type="submit" >Sign Up</button>
         </form>

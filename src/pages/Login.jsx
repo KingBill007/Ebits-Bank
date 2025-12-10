@@ -6,11 +6,14 @@ import Cookies from 'js-cookie';
 import axios from 'axios';
 import {URL} from '../data/URL';
 import Modal from 'react-modal';
+import { FaEye } from "react-icons/fa";
+import { FaEyeSlash } from "react-icons/fa";
 
 function Login() {
 
   const [email, setemail] = useState();
   const [password, setpassword] = useState();
+  const [showPassword,setshowPassword] = useState(false)
 
   const navigate = useNavigate();
   const navigateTo = (location) =>{
@@ -73,7 +76,14 @@ function Login() {
           <input className="loginInput" type="email" onChange={(val)=>{setemail(val.target.value)}} />
 
           <label>Password</label>
-          <input className="loginInput" type="password" onChange={(val)=>{setpassword(val.target.value)}} />
+          <div style={{position:'relative'}}>
+            <input className="loginInput" type={showPassword ? 'text' : "password"} onChange={(val)=>{setpassword(val.target.value)}} />
+            <span
+              style={{position:'absolute',right:3,top:'20%'}}
+              onClick={()=>{showPassword ? setshowPassword(false) : setshowPassword(true)}} >
+                {showPassword ? <FaEye opacity={0.3} /> : <FaEyeSlash opacity={0.3} />}
+            </span>
+          </div>
 
           <button className="signInBtn" onClick={Login}>Sign In</button>
         </form>

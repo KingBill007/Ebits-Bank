@@ -1,6 +1,7 @@
+import React from 'react';
 import '../styles/main.css';
 import Card from '../components/Card';
-import data from '../data/Data';
+//import data from '../data/Data';
 import { useState , useEffect , useRef } from 'react';
 import Header from '../components/Header';
 import axios from 'axios';
@@ -15,10 +16,12 @@ import { Oval } from 'react-loader-spinner';//loading spinner
 
 function Dashboard () {
 
+    const [data, setdata] = useState([]);
     const [isLoading, setisLoading] = useState(false)
     const [method, setmethod] = useState('');
     const [totalBal, settotalBal] = useState(202.20);
     const [depAmount, setdepAmount] = useState(0);
+    const [desData, setdesData] = useState("");
     const [activeAccNo, setactiveaccNo] = useState();
     const modalType = useRef('');
     const [activeType, setactiveType] = useState('');
@@ -52,8 +55,19 @@ function Dashboard () {
                 navigateTo('');
                 return;
             }
+            //get user details and store as cookie if they dont already exist
+            if(!Cookies.get('fName') || !Cookies.get('lName') || !Cookies.get('email') || !Cookies.get('pNumber')){
+                const user = await axios.get(`${URL.baseURL}${URL.API_URL}/users/getUser/${userId}`);
+                console.log(user.data)
+                Cookies.set('fName', user.data.message[0].fName, { expires: 3 });//store all user details as cookies
+                Cookies.set('lName', user.data.message[0].lName, { expires: 3 });
+                Cookies.set('email', user.data.message[0].email, { expires: 3 });
+                Cookies.set('pNumber', user.data.message[0].pNumber, { expires: 3 });
+            }
+            
             //get user accounts
             const response = await axios.get(`${URL.baseURL}${URL.API_URL}/accounts/checkAcc/${userId}`);
+            //console.log(response)
             if (response.data && response.data.length > 0){
                 sethasAccount(true)
                 setInfo(response.data)
@@ -66,6 +80,11 @@ function Dashboard () {
             const totalValue = response.data.filter(acc => acc.userId._id === userId).reduce((sum, acc) => sum + acc.Value, 0);
             settotalBal(totalValue)
 
+            //get User transaction history
+            const history = await axios.get(`${URL.baseURL}${URL.API_URL}/transactions/getuser/${userId}`);
+            setdata(history.data.message);
+            //console.log(history.data.message , `${URL.baseURL}${URL.API_URL}/transactions/getuser/${userId}`)
+
             if (errorOpen) {
                 const timer = setTimeout(() => {
                 seterrorOpen(false);  // this triggers fade-out
@@ -74,7 +93,7 @@ function Dashboard () {
                 return () => clearTimeout(timer);
             }
         }catch(err){
-            console.log(err)
+            showError(err)
         }
     }
     useEffect(()=>{
@@ -105,9 +124,11 @@ function Dashboard () {
             const response = await axios.post(`${URL.baseURL}${URL.API_URL}/accounts/deposit`,{
                 accNumber: activeAccNo,
                 accType: activeType,
-                amount: Number(Math.floor(Amount * 100) / 100)
+                amount: Number(Math.floor(Amount * 100) / 100),
+                description: desData,
+                userId: userId
             });
-            console.log(response.data)
+            //console.log(response.data)
             if (!response.data.Sucess){
                 showError(response.data.message)
             }
@@ -115,7 +136,7 @@ function Dashboard () {
             setdepOpen(false);
             setisLoading(false)
         }catch(err){
-            console.log(err)
+            showError(err)
         }
     }
 
@@ -129,7 +150,7 @@ function Dashboard () {
                     userId: userId
                 }
             );
-            console.log(createType)
+            //console.log(createType)
             checkAccounts();
             setcreateOpen(false)
             if (!response.data.Sucess){
@@ -137,7 +158,7 @@ function Dashboard () {
             }
             //console.log('response: ',response)
         }catch(err){
-            console.log(err)
+            showError(err)
         }
     }
     
@@ -149,8 +170,8 @@ function Dashboard () {
                     { hasAccount ? 
                         (
                             info.map((item,index)=>
-                                <>
-                                    <Card key={index}
+                                <React.Fragment key={item._id}>
+                                    <Card
                                         type={item.accType} 
                                         amount={item.Value} 
                                         account={item.accNumber} 
@@ -160,7 +181,7 @@ function Dashboard () {
                                         <button onClick={()=>{setcreateOpen(true)}} style={{width:'10%',height:100}} ><FaPlus size={50} color='rgba(63, 63, 64, 0.46)' /></button> :
                                         <></>
                                     }
-                                </>
+                                </React.Fragment>
                             )
                         )
                         :
@@ -172,7 +193,7 @@ function Dashboard () {
                 </div>
                 <div className='bottomContent'>
                     <div className='upperBttm'>
-                        <text style={{fontSize:19, fontWeight:'bold'}}>Transaction History</text>
+                        <span style={{fontSize:19, fontWeight:'bold'}}>Transaction History</span>
                         <select value={selectVal} onChange={(val)=>setselectVal(val.target.value)}>
                             <option value="All">All Accounts</option>
                             <option value="Current">Current Account</option>
@@ -190,12 +211,12 @@ function Dashboard () {
                                 </tr>
                             </thead>
                             <tbody>
-                                {data.filter(item => selectVal==='All' || item.account=== selectVal).map((info)=>
-                                <tr>
+                                {data.filter(item => selectVal==='All' || item.accType=== selectVal).map((info)=>
+                                <tr key={info._id}>
                                     <td>{info.date}</td>
                                     <td>{info.description}</td>
-                                    <td style={{color:'rgba(0, 72, 255, 1)'}}>{info.account}</td>
-                                    <td>{info.amount}</td>
+                                    <td style={{color:'rgba(0, 72, 255, 1)'}}>{info.accType}</td>
+                                    <td>{info.Value}</td>
                                 </tr>
                                 )}
                             </tbody>
@@ -212,7 +233,8 @@ function Dashboard () {
                     overlayClassName={styles.modalOverlay} 
                 >
                         <h2>{activeType} Account</h2>
-                        <input type='number' min='0' step={.01} placeholder='Gh₵ (2 decimal place)' onChange={(val)=>setdepAmount(Number(val.target.value))}></input>
+                        <input type='number' min='0' step={.01} placeholder='Gh₵ (2 decimal place)' onChange={(val)=>setdepAmount(Number(val.target.value))} />
+                        <textarea onChange={(val)=>setdesData(val.target.value)}></textarea>
                         <button onClick={depositFunc} style={{display:'flex',justifyContent:'center',alignItems:'center'}}>
                             {isLoading ?
                                 <Oval
@@ -257,3 +279,6 @@ function Dashboard () {
     )
 }   
 export default Dashboard
+//make sure userId is correct in cookies
+//make sure accNo doesnt already exist before saving acc
+//store acc id in transactionsr
