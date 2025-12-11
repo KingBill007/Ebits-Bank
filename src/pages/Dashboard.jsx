@@ -32,6 +32,7 @@ function Dashboard () {
     const userId = Cookies.get('userId');
     const [selectVal, setselectVal] = useState('All')
     const [info, setInfo] = useState();
+    const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
     //ERROR display function
     const [errorOpen, seterrorOpen] = useState(false);
@@ -213,7 +214,17 @@ function Dashboard () {
                             <tbody>
                                 {data.filter(item => selectVal==='All' || item.accType=== selectVal).map((info)=>
                                 <tr key={info._id}>
-                                    <td>{info.date}</td>
+                                    <td>{(()=>{
+                                        //Date function
+                                        const date = new Date(info.date);
+                                        const month = MONTHS[date.getMonth()];
+                                        const day = date.getDate();
+                                        const year = date.getFullYear();
+                                        const hour = date.getHours();
+                                        const minute = String(date.getMinutes()).padStart(2, "0");
+                                        const dateRefined = (`${month} ${day}, ${year} :: ${hour}:${minute}`)
+                                        return dateRefined;
+                                    })()}</td>
                                     <td>{info.description}</td>
                                     <td style={{color:'rgba(0, 72, 255, 1)'}}>{info.accType}</td>
                                     <td>{info.Value}</td>
@@ -279,6 +290,4 @@ function Dashboard () {
     )
 }   
 export default Dashboard
-//make sure userId is correct in cookies
 //make sure accNo doesnt already exist before saving acc
-//store acc id in transactionsr
